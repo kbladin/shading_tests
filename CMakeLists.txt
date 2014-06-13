@@ -12,6 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/Modules)
 find_package(OPENGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLFW3 REQUIRED)
+find_package(ASSIMP REQUIRED)
 
 if(APPLE)
   # Find external libraries
@@ -19,9 +20,10 @@ if(APPLE)
   find_library(COCOA_FRAMEWORK Cocoa)
 endif(APPLE)
 
-# Add glew and glfw to the include directories 
+# Add include directories 
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${GLFW_INCLUDE_DIRS})
+include_directories(${ASSIMP_INCLUDE_DIRs})
 
 # Our own include directory
 set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include)
@@ -56,7 +58,7 @@ add_executable(ShaderTests src/main.cpp)
 set_target_properties(ShaderTests PROPERTIES COMPILE_FLAGS "-std=c++11")
 
 # Link all the libraries (including our own)
-target_link_libraries(ShaderTests Kalles_GL_Lib Shader_Tests_lib ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${GLFW_LIBRARIES})
+target_link_libraries(ShaderTests Kalles_GL_Lib Shader_Tests_lib ${ASSIMP_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${GLFW_LIBRARIES})
 
 ######### OPENGL LIBRARY (ONLY FOR OSX) #############
 if(APPLE)

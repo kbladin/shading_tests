@@ -1,12 +1,16 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "../include/Camera.h"
+#include <vector>
 
-class Scene {
+#include "../include/kalles_gl_lib/Camera.h"
+#include "../include/kalles_gl_lib/Mesh.h"
+
+class Scene
+{
 public:
   Scene(Camera cam);
-  ~Scene(){};
+  ~Scene();
 
   void Render();
   void Update();
@@ -14,9 +18,9 @@ public:
   void SetCamera(Camera cam);
   Camera GetCamera();
 
-private:
   Camera cam_;
-  
+private:
+  std::vector<Mesh*> meshes_;
 };
 
 #endif  // SCENE_H

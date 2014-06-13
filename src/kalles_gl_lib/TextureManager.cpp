@@ -1,5 +1,3 @@
-#include "../../include/kalles_gl_lib/TextureManager.h"
-
 // C++
 #include <iostream>
 #include <string>
@@ -10,6 +8,8 @@
 #include <cstring>
 // External
 #include <GL/glew.h>
+
+#include "../../include/kalles_gl_lib/TextureManager.h"
 
 //////////////
 // Material //
