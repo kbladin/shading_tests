@@ -6,7 +6,9 @@
 
 Scene::Scene(Camera cam) : cam_(cam)
 {
-  meshes_.push_back(new MyMesh());
+  //Material material;
+  //material.SetDiffuseTexture("test_texture1");
+  meshes_.push_back(new MyMesh("../data/meshes/suzanne.obj"));
 }
 
 Scene::~Scene()

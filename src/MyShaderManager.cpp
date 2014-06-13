@@ -7,12 +7,15 @@ MyShaderManager* MyShaderManager::Instance()
     std::cout << "Error: Calling Instance() before instance created!"
             << std::endl;
   }
-  return static_cast<MyShaderManager*>(instance_);
+  return reinterpret_cast<MyShaderManager*>(instance_);
 }
 
 void MyShaderManager::CreateInstance()
 {
-  instance_ = new MyShaderManager();
+  if (!instance_)
+  {
+    instance_ = new MyShaderManager();
+  }
 }
 
 void MyShaderManager::AddAllShaders()

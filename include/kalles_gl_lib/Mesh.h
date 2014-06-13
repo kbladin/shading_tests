@@ -34,8 +34,6 @@ protected:
   std::vector<glm::vec3> vertex_normal_data_;
   std::vector<glm::vec2> vertex_uv_data_;
   std::vector<GLushort> element_data_;
-
-  //Material material_;
 };
 
 #endif // MESH_H

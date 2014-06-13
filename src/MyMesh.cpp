@@ -4,10 +4,10 @@
 
 #include "../include/MyMesh.h"
 
-MyMesh::MyMesh() : Mesh()
+MyMesh::MyMesh(const char* file_path) : Mesh()
 {
   loadMesh_assimp(
-  "../data/meshes/suzanne.obj",
+  file_path,
   element_data_,
   vertex_position_data_, 
   vertex_uv_data_, 
@@ -32,7 +32,7 @@ void MyMesh::Render(Camera* camera, glm::mat4 model_transform)
 
   glBindVertexArray(vertex_array_id_);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_id_);
-  //TextureManager::Instance()->BindTexture(material_.GetDiffuseTextureID());
+  //MyTextureManager::Instance()->BindTexture(material_.GetDiffuseTextureID());
 
   glDrawElements(
           GL_TRIANGLES,      // mode

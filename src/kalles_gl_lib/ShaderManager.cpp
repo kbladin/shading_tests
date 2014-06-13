@@ -13,6 +13,8 @@ ShaderManager* ShaderManager::instance_ = NULL;
  \return The one instance of the ShaderManager
  */
 ShaderManager* ShaderManager::Instance() {
+  if (!instance_)
+    std::cout << "ERROR: ShaderManager not initialized!" << std::endl;
   return instance_;
 }
 

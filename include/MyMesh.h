@@ -7,7 +7,7 @@ class MyMesh : public Mesh
 {
   friend class Renderer;
 public:
-	MyMesh();
+	MyMesh(const char* file_path);
 	~MyMesh(){};
   void Render(Camera* camera, glm::mat4 model_transform);
 };
