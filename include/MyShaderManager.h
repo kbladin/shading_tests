@@ -9,11 +9,7 @@ public:
   static MyShaderManager* Instance();
   static void CreateInstance();
 private:
-  MyShaderManager() : ShaderManager()
-  {
-  	AddAllShaders();
-  	AddAllShaderPrograms();
-  };
+  MyShaderManager();
 
   void AddAllShaders();
   void AddAllShaderPrograms();
@@ -21,6 +17,9 @@ private:
   // ShaderPrograms
   void AddSimpleShaderProgram();
   void AddBasicShaderProgram();
+  void AddNormalColorShaderProgram();
+  void AddRenderTextureShaderProgram();
+  void AddTextureCombinerShaderProgram();
 };
 
 #endif // MY_SHADER_MANAGER_H

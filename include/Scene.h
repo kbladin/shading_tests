@@ -5,6 +5,7 @@
 
 #include "../include/kalles_gl_lib/Camera.h"
 #include "../include/kalles_gl_lib/Mesh.h"
+#include "../include/RenderTexture.h"
 
 struct LightSource {
 	// 1
@@ -34,18 +35,15 @@ struct LightSource {
 class Scene
 {
 public:
-  Scene(Camera cam);
+  Scene(Camera* cam);
   ~Scene();
-
-  void Render();
+  void Render(int width, int height);
   void Update();
-
-  void SetCamera(Camera cam);
-  Camera GetCamera();
-
-  Camera cam_;
+  Camera* GetCamera();
 private:
+  Camera* cam_;
   std::vector<Mesh*> meshes_;
+  std::vector<RenderTexture*> render_textures_;
   std::vector<LightSource> light_sources_;
 };
 

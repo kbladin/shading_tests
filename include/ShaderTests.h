@@ -7,10 +7,10 @@
 class ShaderTests
 {
 public:
-	ShaderTests();
-	~ShaderTests();
+  ShaderTests();
+  ~ShaderTests();
 private:
-	MyGlWindow my_gl_window_;
+  MyGlWindow my_gl_window_;
 };
 
 #endif

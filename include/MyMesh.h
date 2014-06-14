@@ -5,11 +5,11 @@
 
 class MyMesh : public Mesh
 {
-  friend class Renderer;
 public:
 	MyMesh(const char* file_path);
 	~MyMesh(){};
   void Render(Camera* camera, glm::mat4 model_transform);
+  void RenderWireFrame(Camera* camera, glm::mat4 model_transform);
 };
 
 #endif
