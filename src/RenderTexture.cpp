@@ -119,9 +119,7 @@ int RenderTexture::GetHeight()
 
 void RenderTexture::Render(Camera* camera, glm::mat4 model_transform)
 {
-  // Bind our texture in Texture Unit 0
-  //glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, rendered_texture_);
+  //glBindTexture(GL_TEXTURE_2D, rendered_texture_);
   glBindVertexArray(vertex_array_id_);
   // Draw the triangles !
   glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles

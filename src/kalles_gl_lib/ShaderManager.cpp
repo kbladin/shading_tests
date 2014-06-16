@@ -662,7 +662,6 @@ GLuint ShaderProgram::getID(){
 */
 
 Shader::Shader(const char* file_path, const char* preprocessor_code, int type){
-
   // Create the shader
   shader_id_ = glCreateShader(type);
 
@@ -695,7 +694,6 @@ Shader::Shader(const char* file_path, const char* preprocessor_code, int type){
 	char const * vertex_source_pointer = shader_code.c_str();
 	glShaderSource(shader_id_, 1, &vertex_source_pointer , NULL);
 	glCompileShader(shader_id_);
-
 
 	// Check Vertex Shader
 	glGetShaderiv(shader_id_, GL_COMPILE_STATUS, &result);

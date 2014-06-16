@@ -23,8 +23,11 @@ public:
   void SetupBuffers();
   virtual void Render(Camera* camera, glm::mat4 model_transform) = 0;
   void DeleteBuffers();
-protected:
+
   GLuint vertex_array_id_;
+
+
+protected:
   GLuint element_buffer_id_;
   GLuint vertex_position_buffer_id_;
   GLuint vertex_normal_buffer_id_;

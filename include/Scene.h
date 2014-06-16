@@ -5,24 +5,25 @@
 
 #include "../include/kalles_gl_lib/Camera.h"
 #include "../include/kalles_gl_lib/Mesh.h"
+#include "../include/MyMesh.h"
 #include "../include/RenderTexture.h"
 
 struct LightSource {
-	// 1
-  glm::vec3 color;
+	// 0
   float intensity;
-  // 2
+  glm::vec3 color;
+  // 1
   glm::vec4 position;
-  // 3
+  // 2
   float constant_attenuation, linear_attenuation, quadratic_attenuation;
   float spot_cutoff;
-  // 4
-  glm::vec3 spot_direction;
   float spot_exponent;
+  // 3
+  glm::vec3 spot_direction;
   LightSource() {
     intensity = 50.0f;
     color = glm::vec3(1.0f, 0.9f, 0.8f);
-    position = glm::vec4(10.0f,5.0f,20.0f,1.0f); // w == 0.0 ? => directional
+    position = glm::vec4(5.0f,5.0f,5.0f,1.0f); // w == 0.0 ? => directional
     constant_attenuation = 0.0f;
     linear_attenuation = 0.0f;
     quadratic_attenuation = 1.0f;
@@ -42,7 +43,7 @@ public:
   Camera* GetCamera();
 private:
   Camera* cam_;
-  std::vector<Mesh*> meshes_;
+  std::vector<MyMesh*> meshes_;
   std::vector<RenderTexture*> render_textures_;
   std::vector<LightSource> light_sources_;
 };

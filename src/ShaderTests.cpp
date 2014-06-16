@@ -8,11 +8,12 @@
 
 ShaderTests::ShaderTests()
 {
+  my_gl_window_ = new MyGlWindow();
   MyShaderManager::CreateInstance();
-  my_gl_window_.MainLoop();
+  my_gl_window_->MainLoop();
 }
 
 ShaderTests::~ShaderTests()
 {
-
+	delete my_gl_window_;
 }

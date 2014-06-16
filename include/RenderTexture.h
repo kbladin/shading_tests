@@ -12,14 +12,16 @@ public:
   GLuint GetFrameBuffer();
   int GetWidth();
   int GetHeight();
-private:
-  void SetupFrameBuffer();
-  void SetupVertexData();
-  void SetupBuffers();
+
 
   GLuint frame_buffer_;
   GLuint rendered_texture_; // Might be moved to a texturemanager later
   GLuint depth_render_buffer_;
+
+private:
+  void SetupFrameBuffer();
+  void SetupVertexData();
+  void SetupBuffers();
 
   int width_, height_;
 };
