@@ -99,8 +99,3 @@ void Mesh::DeleteBuffers() {
   if(vertex_array_id_)
     glDeleteVertexArrays(1, &vertex_array_id_);
 }
-
-void Mesh::Render(Camera* camera, glm::mat4 model_transform)
-{
-
-}

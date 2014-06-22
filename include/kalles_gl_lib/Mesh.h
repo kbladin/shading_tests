@@ -21,13 +21,10 @@ public:
 	Mesh();
 	virtual ~Mesh();
   void SetupBuffers();
-  virtual void Render(Camera* camera, glm::mat4 model_transform) = 0;
+  virtual void Render() = 0;
   void DeleteBuffers();
-
-  GLuint vertex_array_id_;
-
-
 protected:
+  GLuint vertex_array_id_;
   GLuint element_buffer_id_;
   GLuint vertex_position_buffer_id_;
   GLuint vertex_normal_buffer_id_;

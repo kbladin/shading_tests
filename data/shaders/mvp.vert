@@ -1,15 +1,11 @@
 // All preprocessor code is in separate string
 
-// Input vertex data, different for all executions of this shader.
+// Input data
 layout(location = 0) in vec3 vertexPosition_modelspace;
-
-// Values that stay constant for the whole mesh.
+// Uniforms
 uniform mat4 MVP;
 
-void main(){	
-
-	// Output position of the vertex, in clip space : MVP * position
-	gl_Position =  MVP * vec4(vertexPosition_modelspace,1);
-
+void main(){
+  // Output position of the vertex
+  gl_Position = MVP * vec4(vertexPosition_modelspace,1);
 }
-

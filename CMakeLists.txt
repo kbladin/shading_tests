@@ -13,6 +13,7 @@ find_package(OPENGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLFW3 REQUIRED)
 find_package(ASSIMP REQUIRED)
+find_package(ANTTWEAKBAR REQUIRED)
 
 if(APPLE)
   # Find external libraries
@@ -24,6 +25,7 @@ endif(APPLE)
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(${ASSIMP_INCLUDE_DIRs})
+include_directories(${ANT_TWEAK_BAR_INCLUDE_PATH})
 
 # Our own include directory
 set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include)
@@ -58,7 +60,7 @@ add_executable(ShaderTests src/main.cpp)
 set_target_properties(ShaderTests PROPERTIES COMPILE_FLAGS "-std=c++11")
 
 # Link all the libraries (including our own)
-target_link_libraries(ShaderTests Kalles_GL_Lib Shader_Tests_lib ${ASSIMP_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${GLFW_LIBRARIES})
+target_link_libraries(ShaderTests Kalles_GL_Lib Shader_Tests_lib ${ASSIMP_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${GLFW_LIBRARIES} ${ANT_TWEAK_BAR_LIBRARY})
 
 ######### OPENGL LIBRARY (ONLY FOR OSX) #############
 if(APPLE)

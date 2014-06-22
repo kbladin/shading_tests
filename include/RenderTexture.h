@@ -8,7 +8,7 @@ class RenderTexture : public Mesh
 public:
 	RenderTexture(int width, int height);
 	~RenderTexture(){};
-  void Render(Camera* camera, glm::mat4 model_transform);
+  void Render();
   GLuint GetFrameBuffer();
   int GetWidth();
   int GetHeight();

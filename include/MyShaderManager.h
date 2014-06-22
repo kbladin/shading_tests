@@ -8,7 +8,7 @@ class MyShaderManager : public ShaderManager
 public:
   static MyShaderManager* Instance();
   static void CreateInstance();
-  const int N_LIGHTSOURCES; 
+  static const int N_LIGHTSOURCES; 
 private:
   MyShaderManager();
 
@@ -22,7 +22,9 @@ private:
   void AddTextureCombinerShaderProgram();
   void AddPhongShaderProgram();
   void AddBrightLightShaderProgram();
-  void AddGaussianBlurShaderProgram();
+  void AddBlurShaderProgram();
+  void AddToonShaderProgram();
+  void AddOneColorShaderProgram();
 
 };
 

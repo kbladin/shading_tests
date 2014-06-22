@@ -1,4 +1,6 @@
 #include "../include/ShaderTests.h"
+#include <AntTweakBar.h>
+
 
 int main(int argc, char const *argv[])
 {

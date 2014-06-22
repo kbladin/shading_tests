@@ -1,7 +1,9 @@
 #include <iostream>
+#include <sstream>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <AntTweakBar.h>
 
 #include "../include/Scene.h"
 
@@ -23,6 +25,11 @@ MyGlWindow::MyGlWindow()
           200.0f,
           0.1f,
           aspect_ratio));
+  // Initialize anttweakbar
+  TwInit(TW_OPENGL_CORE, NULL);
+  TwWindowSize(width*2, height*2);
+  TwBar *myBar;
+  myBar = TwNewBar("NameOfMyTweakBar");
 }
 
 MyGlWindow::~MyGlWindow()
@@ -61,7 +68,7 @@ int MyGlWindow::InitGLFW()
 
 int MyGlWindow::InitOpenGL()
 {
-  glClearColor(0.5f,0.5f,0.5f,0.5f);
+  glClearColor(0.1f,0.1f,0.2f,0.0f);
   glEnable(GL_DEPTH_TEST);
   // Initialize GLEW
   glewExperimental = true; // Needed in core profile
@@ -73,6 +80,8 @@ int MyGlWindow::InitOpenGL()
 
 void MyGlWindow::MainLoop()
 {
+  float current_time = glfwGetTime();
+  int FPS = 0;
   while (!glfwWindowShouldClose(window_))
   {
     UpdateMousePos();
@@ -81,9 +90,26 @@ void MyGlWindow::MainLoop()
     int width, height;
     glfwGetWindowSize(window_, &width, &height);
     scene_->Render(width, height);
-    
+    TwWindowSize(width*2, height*2);
+    TwDraw();  // draw the tweak bar(s)
+    // Print FPS
+    ++FPS;
+    if((glfwGetTime() - current_time) > 1){
+      std::string title = "Shader Tests, ";
+      std::ostringstream ss;
+      ss << FPS;
+      std::string s(ss.str());
+      title.append(s);
+      title.append(" FPS");
+      glfwSetWindowTitle (window_,  title.c_str());
+      FPS = 0;
+      current_time = glfwGetTime();
+    }
+
     glfwSwapBuffers(window_);
     glfwPollEvents();
+
+
   }
 }
 

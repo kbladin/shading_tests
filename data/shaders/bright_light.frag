@@ -10,7 +10,5 @@ out vec3 color;
 void main(){
 	vec3 color_sample = texture(rendered_texture_sampler, UV).xyz;
 	float intensity = 1.0/3.0 * dot(color_sample, vec3(1));
-	float step_intensity = step(0.7, intensity);
-
-	color = vec3(step_intensity);
+	color = (step(0.5, intensity) == 0) ? vec3(0,0,0) : color_sample;
 }

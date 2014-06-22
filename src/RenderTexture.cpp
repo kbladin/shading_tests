@@ -117,7 +117,7 @@ int RenderTexture::GetHeight()
   return height_;
 }
 
-void RenderTexture::Render(Camera* camera, glm::mat4 model_transform)
+void RenderTexture::Render()
 {
   //glBindTexture(GL_TEXTURE_2D, rendered_texture_);
   glBindVertexArray(vertex_array_id_);

@@ -20,9 +20,10 @@ struct LightSource {
   float spot_exponent;
   // 3
   glm::vec3 spot_direction;
-  LightSource() {
+
+  LightSource(){
     intensity = 50.0f;
-    color = glm::vec3(1.0f, 0.9f, 0.8f);
+    color = glm::vec3(1.0f, 0.8f, 0.6f);
     position = glm::vec4(5.0f,5.0f,5.0f,1.0f); // w == 0.0 ? => directional
     constant_attenuation = 0.0f;
     linear_attenuation = 0.0f;
@@ -45,6 +46,7 @@ private:
   Camera* cam_;
   std::vector<MyMesh*> meshes_;
   std::vector<RenderTexture*> render_textures_;
+  std::vector<MyMesh*> light_source_meshes_;
   std::vector<LightSource> light_sources_;
 };
 
