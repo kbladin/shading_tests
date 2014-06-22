@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <AntTweakBar.h>
 
 #include "../include/Scene.h"
 
@@ -23,13 +24,16 @@ private:
           int scancode,
           int action,
           int mods);
-  static void ScrollFun(GLFWwindow* window, double x_pos, double y_pos);
-  static void MouseButtonFun(
+  static void ScrollCallback(GLFWwindow* window, double x_pos, double y_pos);
+  static void MouseButtonCallback(
           GLFWwindow* window,
           int button,
           int action,
           int mods);
-  static void WindowSizeFun(GLFWwindow* window, int width, int height);
+  static void WindowSizeCallback(GLFWwindow* window, int width, int height);
+  static void MousePosCallback(GLFWwindow* window, double xpos, double ypos);
+  static void CharCallback(GLFWwindow* window, int codepoint);
+
 	
   GLFWwindow* window_;
   static Scene* scene_;

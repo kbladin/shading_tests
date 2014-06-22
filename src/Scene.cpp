@@ -8,6 +8,8 @@
 
 #include "../include/Scene.h"
 
+int Scene::ping_pong_size = 5;
+
 Scene::Scene(Camera* cam) : cam_(cam)
 {
   meshes_.push_back(new MyMesh("../data/meshes/suzanne.obj"));
@@ -156,7 +158,7 @@ void Scene::Render(int width, int height)
   // Ping pong
   int texture_to_sample = 1;
   int texture_to_render = 2;
-  for (int ping_pong = 0; ping_pong < 5; ++ping_pong)
+  for (int ping_pong = 0; ping_pong < ping_pong_size; ++ping_pong)
   {
     //int texture_to_sample = (ping_pong)%2 + 1;
     //int texture_to_render = (ping_pong+1)%2 + 1;

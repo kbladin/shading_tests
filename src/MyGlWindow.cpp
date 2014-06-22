@@ -12,6 +12,7 @@
 Scene* MyGlWindow::scene_;
 bool MyGlWindow::mouse_pressed_;
 
+
 MyGlWindow::MyGlWindow()
 {
   if (InitGLFW() != 0)
@@ -30,6 +31,10 @@ MyGlWindow::MyGlWindow()
   TwWindowSize(width*2, height*2);
   TwBar *myBar;
   myBar = TwNewBar("NameOfMyTweakBar");
+  TwAddVarRW(myBar, "NameOfMyVariable", TW_TYPE_UINT8, &Scene::ping_pong_size, "Ping pongs");
+    std::stringstream s;
+    s << " GLOBAL fontsize=" << 3 << " ";
+    TwDefine(s.str().c_str());
 }
 
 MyGlWindow::~MyGlWindow()
@@ -58,11 +63,14 @@ int MyGlWindow::InitGLFW()
   // Make the window_'s context current
   glfwMakeContextCurrent(window_);
   // Set callback functions
-  glfwSetKeyCallback(window_, KeyCallback);
-  glfwSetErrorCallback(ErrorCallback);
-  glfwSetScrollCallback(window_, ScrollFun);
-  glfwSetMouseButtonCallback(window_, MouseButtonFun);
-  glfwSetWindowSizeCallback(window_, WindowSizeFun);
+  //glfwSetErrorCallback(window_, (GLFWerrorcallbackfun)ErrorCallback);
+  glfwSetMouseButtonCallback(window_, (GLFWmousebuttonfun)MouseButtonCallback);
+  glfwSetCursorPosCallback(window_, (GLFWcursorposfun)MousePosCallback);
+  glfwSetScrollCallback(window_, (GLFWscrollfun)ScrollCallback);
+  glfwSetWindowSizeCallback(window_, WindowSizeCallback);
+  glfwSetKeyCallback(window_, (GLFWkeyfun)KeyCallback);
+  glfwSetCharCallback(window_, (GLFWcharfun)CharCallback);
+
   return 0;
 }
 
@@ -91,6 +99,7 @@ void MyGlWindow::MainLoop()
     glfwGetWindowSize(window_, &width, &height);
     scene_->Render(width, height);
     TwWindowSize(width*2, height*2);
+
     TwDraw();  // draw the tweak bar(s)
     // Print FPS
     ++FPS;
@@ -147,14 +156,16 @@ void MyGlWindow::KeyCallback(
       glfwSetWindowShouldClose(window, true);
     }
   }
+  TwEventKeyGLFW(key, action);
 }
 
-void MyGlWindow::ScrollFun(GLFWwindow* window, double x_pos, double y_pos)
+void MyGlWindow::ScrollCallback(GLFWwindow* window, double x_pos, double y_pos)
 {
   scene_->GetCamera()->IncrementZposition(y_pos);
+  TwEventMouseWheelGLFW(y_pos);
 }
 
-void MyGlWindow::MouseButtonFun(
+void MyGlWindow::MouseButtonCallback(
         GLFWwindow* window,
         int button,
         int action,
@@ -164,10 +175,21 @@ void MyGlWindow::MouseButtonFun(
     mouse_pressed_ = true;
   else if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
     mouse_pressed_ = false;
+  TwEventMouseButtonGLFW(button, action);
 }
 
-void MyGlWindow::WindowSizeFun(GLFWwindow* window, int width, int height)
+void MyGlWindow::WindowSizeCallback(GLFWwindow* window, int width, int height)
 {
   scene_->GetCamera()->SetAspectRatio(width / static_cast<float>(height));
+}
+
+void MyGlWindow::MousePosCallback(GLFWwindow* window, double xpos, double ypos)
+{
+  TwMouseMotion(int(xpos*2), int(ypos*2));
+}
+
+void MyGlWindow::CharCallback(GLFWwindow* window, int codepoint)
+{
+  TwEventCharGLFW(codepoint, GLFW_PRESS);
 }
 

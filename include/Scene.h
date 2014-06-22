@@ -8,6 +8,7 @@
 #include "../include/MyMesh.h"
 #include "../include/RenderTexture.h"
 
+
 struct LightSource {
 	// 0
   float intensity;
@@ -42,6 +43,7 @@ public:
   void Render(int width, int height);
   void Update();
   Camera* GetCamera();
+  static int ping_pong_size;
 private:
   Camera* cam_;
   std::vector<MyMesh*> meshes_;
