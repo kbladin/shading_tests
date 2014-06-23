@@ -5,10 +5,9 @@
 #include "../include/MyMesh.h"
 #include "../include/RenderTexture.h"
 #include "../include/MyShaderManager.h"
+#include "../include/SettingsManager.h"
 
 #include "../include/Scene.h"
-
-int Scene::ping_pong_size = 5;
 
 Scene::Scene(Camera* cam) : cam_(cam)
 {
@@ -158,10 +157,8 @@ void Scene::Render(int width, int height)
   // Ping pong
   int texture_to_sample = 1;
   int texture_to_render = 2;
-  for (int ping_pong = 0; ping_pong < ping_pong_size; ++ping_pong)
+  for (int ping_pong = 0; ping_pong < SettingsManager::Instance()->n_blur_loops; ++ping_pong)
   {
-    //int texture_to_sample = (ping_pong)%2 + 1;
-    //int texture_to_render = (ping_pong+1)%2 + 1;
     MyShaderManager::Instance()->UseProgram("Blur");
     MyShaderManager::Instance()->GetShaderProgramFromName(
             "Blur")->Uniform1i("texture_sampler", texture_to_sample);
@@ -171,6 +168,8 @@ void Scene::Render(int width, int height)
                     (render_textures_[texture_to_sample]->GetWidth()),
                     1.0/static_cast<float>
                     (render_textures_[texture_to_sample]->GetHeight()));
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Blur")->Uniform1i("filter_size", SettingsManager::Instance()->filter_size);
     // Render to our framebuffer in our second/third RenderTexture
     glBindFramebuffer(
             GL_FRAMEBUFFER,
@@ -197,6 +196,10 @@ void Scene::Render(int width, int height)
           "Texture_Combiner")->Uniform1i("texture_sampler1", 0);
   MyShaderManager::Instance()->GetShaderProgramFromName(
           "Texture_Combiner")->Uniform1i("texture_sampler2", texture_to_sample);
+  MyShaderManager::Instance()->GetShaderProgramFromName(
+          "Texture_Combiner")->Uniform1f("multiplier1", SettingsManager::Instance()->multiplier1);
+  MyShaderManager::Instance()->GetShaderProgramFromName(
+          "Texture_Combiner")->Uniform1f("multiplier2", SettingsManager::Instance()->multiplier2);
   // Render to screen
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glViewport(0, 0, width * 2, height * 2); // *2 Because of retina screen.
@@ -208,8 +211,10 @@ void Scene::Render(int width, int height)
 void Scene::Update()
 {
   cam_->UpdateMatrices();
-  light_sources_[0].position.x = glm::sin(glfwGetTime()) * 7;
-  light_sources_[0].position.z = glm::sin(glfwGetTime() + M_PI/2) * 7;
+  //light_sources_[0].position.x = glm::sin(glfwGetTime()) * 7;
+  //light_sources_[0].position.z = glm::sin(glfwGetTime() + M_PI/2) * 7;
+
+  light_sources_[0].position = -SettingsManager::Instance()->light_pos;
 }
 
 Camera* Scene::GetCamera()

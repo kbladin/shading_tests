@@ -257,6 +257,8 @@ void MyShaderManager::AddTextureCombinerShaderProgram()
 
   shader_programs_[shader_program_name]->CreateUniformLocation("texture_sampler1");
   shader_programs_[shader_program_name]->CreateUniformLocation("texture_sampler2");
+  shader_programs_[shader_program_name]->CreateUniformLocation("multiplier1");
+  shader_programs_[shader_program_name]->CreateUniformLocation("multiplier2");
 }
 
 void MyShaderManager::AddBrightLightShaderProgram()
@@ -290,6 +292,7 @@ void MyShaderManager::AddBlurShaderProgram()
 
   shader_programs_[shader_program_name]->CreateUniformLocation("texture_sampler");
   shader_programs_[shader_program_name]->CreateUniformLocation("pixel_size");
+  shader_programs_[shader_program_name]->CreateUniformLocation("filter_size");
 }
 
 void MyShaderManager::AddOneColorShaderProgram()

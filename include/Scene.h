@@ -43,7 +43,6 @@ public:
   void Render(int width, int height);
   void Update();
   Camera* GetCamera();
-  static int ping_pong_size;
 private:
   Camera* cam_;
   std::vector<MyMesh*> meshes_;

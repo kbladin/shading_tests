@@ -6,8 +6,8 @@
 #include <AntTweakBar.h>
 
 #include "../include/Scene.h"
-
 #include "../include/MyGlWindow.h"
+#include "../include/SettingsManager.h"
 
 Scene* MyGlWindow::scene_;
 bool MyGlWindow::mouse_pressed_;
@@ -31,10 +31,43 @@ MyGlWindow::MyGlWindow()
   TwWindowSize(width*2, height*2);
   TwBar *myBar;
   myBar = TwNewBar("NameOfMyTweakBar");
-  TwAddVarRW(myBar, "NameOfMyVariable", TW_TYPE_UINT8, &Scene::ping_pong_size, "Ping pongs");
-    std::stringstream s;
-    s << " GLOBAL fontsize=" << 3 << " ";
-    TwDefine(s.str().c_str());
+  TwAddVarRW(
+          myBar,
+          "n_blur_loops",
+          TW_TYPE_UINT8,
+          &SettingsManager::Instance()->n_blur_loops,
+          "Number of blur loops");
+  TwAddVarRW(
+          myBar,
+          "filter_size",
+          TW_TYPE_UINT8,
+          &SettingsManager::Instance()->filter_size,
+          "Filter size");
+  TwAddVarRW(
+          myBar,
+          "multiplier1",
+          TW_TYPE_FLOAT,
+          &SettingsManager::Instance()->multiplier1,
+          "Multiplier 1");
+  TwAddVarRW(
+          myBar,
+          "multiplier2",
+          TW_TYPE_FLOAT,
+          &SettingsManager::Instance()->multiplier2,
+          "Multiplier 2");
+  TwDefine(" NameOfMyTweakBar/multiplier1  min=-1.0 max=2.0 ");  // variable 'speed' is bounded to [0,250]
+  TwDefine(" NameOfMyTweakBar/multiplier1  step=0.1 ");  // variable 'speed' can be interactively incremented or decremented by 0.5
+  TwDefine(" NameOfMyTweakBar/multiplier2  min=-1.0 max=2.0 ");  // variable 'speed' is bounded to [0,250]
+  TwDefine(" NameOfMyTweakBar/multiplier2  step=0.1 ");  // variable 'speed' can be interactively incremented or decremented by 0.5
+  
+  TwAddVarRW(myBar, "LightDir", TW_TYPE_DIR3F, &SettingsManager::Instance()->light_pos.x, "");
+
+
+
+  TwDefine(" GLOBAL fontsize=3 ");
+  TwDefine(" GLOBAL fontresizable=false "); // font cannot be resized
+  //TwDefine(" GLOBAL fontstyle=fixed "); // use fixed-width font
+
 }
 
 MyGlWindow::~MyGlWindow()
