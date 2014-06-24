@@ -7,6 +7,7 @@
 #include "../include/kalles_gl_lib/Mesh.h"
 #include "../include/MyMesh.h"
 #include "../include/RenderTexture.h"
+#include "../include/Quad.h"
 
 
 struct LightSource {
@@ -50,6 +51,7 @@ private:
   std::vector<MyMesh*> meshes_;
   std::vector<RenderTexture*> render_textures_;
   std::vector<MyMesh*> light_source_meshes_;
+  Quad quad_;
 };
 
 #endif // SCENE_H

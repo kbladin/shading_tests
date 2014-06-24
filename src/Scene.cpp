@@ -223,7 +223,7 @@ void Scene::Render(int width, int height)
           render_textures_[2]->GetWidth(),
           render_textures_[2]->GetHeight());
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  render_textures_[2]->Render();
+  quad_.Render();
   glUseProgram(0);
 
 
@@ -245,7 +245,7 @@ void Scene::Render(int width, int height)
   glViewport(0, 0, width * 2, height * 2); // *2 Because of retina screen.
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
-  render_textures_[0]->Render();
+  quad_.Render();
 
   #endif
 
@@ -350,7 +350,7 @@ void Scene::Render(int width, int height)
           render_textures_[1]->GetWidth(),
           render_textures_[1]->GetHeight());
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  render_textures_[0]->Render();
+  quad_.Render();
   glUseProgram(0);
 
 
@@ -384,7 +384,7 @@ void Scene::Render(int width, int height)
             render_textures_[texture_to_render]->GetWidth(),
             render_textures_[texture_to_render]->GetHeight());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    render_textures_[0]->Render();
+    quad_.Render();
 
     int tmp = texture_to_render;
     texture_to_render = texture_to_sample;
@@ -409,7 +409,7 @@ void Scene::Render(int width, int height)
   glViewport(0, 0, width * 2, height * 2); // *2 Because of retina screen.
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
-  render_textures_[1]->Render();
+  quad_.Render();
 }
 
 void Scene::Update()
