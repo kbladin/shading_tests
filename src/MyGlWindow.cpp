@@ -26,53 +26,13 @@ MyGlWindow::MyGlWindow()
           200.0f,
           0.1f,
           aspect_ratio));
-  // Initialize anttweakbar
-  TwInit(TW_OPENGL_CORE, NULL);
-  TwWindowSize(width*2, height*2);
-  TwBar *myBar;
-  myBar = TwNewBar("NameOfMyTweakBar");
-  TwAddVarRW(
-          myBar,
-          "n_blur_loops",
-          TW_TYPE_UINT8,
-          &SettingsManager::Instance()->n_blur_loops,
-          "Number of blur loops");
-  TwAddVarRW(
-          myBar,
-          "filter_size",
-          TW_TYPE_UINT8,
-          &SettingsManager::Instance()->filter_size,
-          "Filter size");
-  TwAddVarRW(
-          myBar,
-          "multiplier1",
-          TW_TYPE_FLOAT,
-          &SettingsManager::Instance()->multiplier1,
-          "Multiplier 1");
-  TwAddVarRW(
-          myBar,
-          "multiplier2",
-          TW_TYPE_FLOAT,
-          &SettingsManager::Instance()->multiplier2,
-          "Multiplier 2");
-  TwDefine(" NameOfMyTweakBar/multiplier1  min=-1.0 max=2.0 ");  // variable 'speed' is bounded to [0,250]
-  TwDefine(" NameOfMyTweakBar/multiplier1  step=0.1 ");  // variable 'speed' can be interactively incremented or decremented by 0.5
-  TwDefine(" NameOfMyTweakBar/multiplier2  min=-1.0 max=2.0 ");  // variable 'speed' is bounded to [0,250]
-  TwDefine(" NameOfMyTweakBar/multiplier2  step=0.1 ");  // variable 'speed' can be interactively incremented or decremented by 0.5
-  
-  TwAddVarRW(myBar, "LightDir", TW_TYPE_DIR3F, &SettingsManager::Instance()->light_pos.x, "");
-
-
-
-  TwDefine(" GLOBAL fontsize=3 ");
-  TwDefine(" GLOBAL fontresizable=false "); // font cannot be resized
-  //TwDefine(" GLOBAL fontstyle=fixed "); // use fixed-width font
-
+  InitTW();
 }
 
 MyGlWindow::~MyGlWindow()
 {
   glfwTerminate();
+  TwTerminate();
   delete scene_;
 }
 
@@ -116,6 +76,116 @@ int MyGlWindow::InitOpenGL()
   if (glewInit() != GLEW_OK) {
       return -1;
   }
+  return 0;
+}
+
+int MyGlWindow::InitTW()
+{
+  int width, height;
+  glfwGetWindowSize(window_, &width, &height);
+    // Initialize anttweakbar
+  TwInit(TW_OPENGL_CORE, NULL);
+  TwWindowSize(width*2, height*2);
+  TwBar *global_bar;
+  global_bar = TwNewBar("Global Variables");
+  TwAddVarRW(
+          global_bar,
+          "Number of blur loops",
+          TW_TYPE_UINT8,
+          &SettingsManager::Instance()->n_blur_loops,
+          "");
+  TwAddVarRW(
+          global_bar,
+          "Blur filter size",
+          TW_TYPE_UINT8,
+          &SettingsManager::Instance()->filter_size,
+          "");
+  TwAddVarRW(
+          global_bar,
+          "Multiplier 1",
+          TW_TYPE_FLOAT,
+          &SettingsManager::Instance()->multiplier1,
+          "min=-1.0 max=2.0 step=0.1");
+  TwAddVarRW(
+          global_bar,
+          "Multiplier 2",
+          TW_TYPE_FLOAT,
+          &SettingsManager::Instance()->multiplier2,
+          "min=-1.0 max=2.0 step=0.1");
+
+  for (int i = 0; i < SettingsManager::Instance()->N_LIGHTSOURCES; ++i)
+  {
+    TwBar *light_bar;
+    std::stringstream bar_name;
+    bar_name << "Light " << i << " properties";
+    light_bar = TwNewBar(bar_name.str().c_str());
+
+    TwAddVarRW(
+            light_bar,
+            "Intensity", 
+            TW_TYPE_FLOAT,
+            &scene_->light_sources_[i].intensity,
+            "min=0.0 max=100.0 step=1.0");
+    TwAddVarRW(
+            light_bar,
+            "Color", 
+            TW_TYPE_COLOR3F,
+            &scene_->light_sources_[i].color.x,
+            "");
+    TwAddVarRW(
+            light_bar,
+            "Position", 
+            TW_TYPE_DIR3F,
+            &scene_->light_sources_[i].position.x,
+            "");
+/*    TwAddVarRW(
+            light_bar,
+            "Directional", 
+            TW_TYPE_BOOL32,
+            &scene_->light_sources_[i].position.w,
+            "");*/
+    TwAddVarRW(
+            light_bar,
+            "Constant attenuation",
+            TW_TYPE_FLOAT,
+            &scene_->light_sources_[i].constant_attenuation,
+            "min=0.0 max=1.0 step=0.1");
+    TwAddVarRW(
+            light_bar,
+            "Linear attenuation",
+            TW_TYPE_FLOAT,
+            &scene_->light_sources_[i].linear_attenuation,
+            "min=0.0 max=1.0 step=0.1");
+    TwAddVarRW(
+            light_bar,
+            "Quadratic attenuation",
+            TW_TYPE_FLOAT,
+            &scene_->light_sources_[i].quadratic_attenuation,
+            "min=0.0 max=1.0 step=0.1");
+    TwAddVarRW(
+            light_bar,
+            "Spot cutoff",
+            TW_TYPE_FLOAT,
+            &scene_->light_sources_[i].spot_cutoff,
+            "min=0.0 max=100.0 step=1.0");
+    TwAddVarRW(
+            light_bar,
+            "Spot exponent",
+            TW_TYPE_FLOAT,
+            &scene_->light_sources_[i].spot_exponent,
+            "min=0.0 max=100.0 step=1.0");
+    TwAddVarRW(
+            light_bar,
+            "Spot direction",
+            TW_TYPE_DIR3F,
+            &scene_->light_sources_[i].spot_direction.x,
+            "");
+
+  }
+
+  TwDefine(" GLOBAL fontsize=3 ");
+  TwDefine(" GLOBAL fontresizable=false "); // font cannot be resized
+
   return 0;
 }
 
@@ -204,9 +274,9 @@ void MyGlWindow::MouseButtonCallback(
         int action,
         int mods)
 {
-  if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
+  if (button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS)
     mouse_pressed_ = true;
-  else if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
+  else if (button == GLFW_MOUSE_BUTTON_2 && action == GLFW_RELEASE)
     mouse_pressed_ = false;
   TwEventMouseButtonGLFW(button, action);
 }

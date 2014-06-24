@@ -43,12 +43,13 @@ public:
   void Render(int width, int height);
   void Update();
   Camera* GetCamera();
+  std::vector<LightSource> light_sources_;
+
 private:
   Camera* cam_;
   std::vector<MyMesh*> meshes_;
   std::vector<RenderTexture*> render_textures_;
   std::vector<MyMesh*> light_source_meshes_;
-  std::vector<LightSource> light_sources_;
 };
 
 #endif // SCENE_H

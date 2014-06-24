@@ -11,11 +11,10 @@ SettingsManager* SettingsManager::Instance()
 	return instance_;
 }
 
-SettingsManager::SettingsManager()
+SettingsManager::SettingsManager() : N_LIGHTSOURCES(1)
 {
 	n_blur_loops = 5;
 	filter_size = 29;
 	multiplier1 = 1.0f;
 	multiplier2 = 1.0f;
-	light_pos = glm::vec4(5.0f,5.0f,5.0f,1.0f);
 }

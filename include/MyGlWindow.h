@@ -16,6 +16,7 @@ public:
 private:
   int InitGLFW();
   int InitOpenGL();
+  int InitTW();
   void UpdateMousePos();
   static void ErrorCallback(int error, const char* description);
   static void KeyCallback(

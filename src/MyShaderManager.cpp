@@ -1,6 +1,5 @@
 #include "../include/MyShaderManager.h"
-
-const int MyShaderManager::N_LIGHTSOURCES = 1;
+#include "../include/SettingsManager.h"
 
 MyShaderManager::MyShaderManager() : ShaderManager()
 {
@@ -34,7 +33,7 @@ void MyShaderManager::AddAllShaders()
   std::stringstream preprocessor_phong_frag;
   preprocessor_phong_frag <<
           "#version 330 core \n" <<
-          "#define N_LIGHTSOURCES " << N_LIGHTSOURCES << "\n";
+          "#define N_LIGHTSOURCES " << SettingsManager::Instance()->N_LIGHTSOURCES << "\n";
 
   // Create shaders
   Shader* simple_mvp_vert = new Shader(
@@ -123,7 +122,7 @@ void MyShaderManager::AddAllShaderPrograms()
 {
   AddSimpleShaderProgram();
   AddNormalColorShaderProgram();
-  AddRenderTextureShaderProgram();
+  AddEdgeDetectorShaderProgram();
   AddTextureCombinerShaderProgram();
   AddPhongShaderProgram();
   AddBrightLightShaderProgram();
@@ -223,9 +222,11 @@ void MyShaderManager::AddNormalColorShaderProgram()
   shader_programs_.insert(StringShaderProgPair(
       shader_program_name,
       shader_program) );
+
+  shader_programs_[shader_program_name]->CreateUniformLocation("MVP");
 }
 
-void MyShaderManager::AddRenderTextureShaderProgram()
+void MyShaderManager::AddEdgeDetectorShaderProgram()
 {
     // Create ShaderProgram
   ShaderProgram* shader_program =

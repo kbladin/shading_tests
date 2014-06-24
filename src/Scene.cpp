@@ -16,7 +16,7 @@ Scene::Scene(Camera* cam) : cam_(cam)
   render_textures_.push_back(new RenderTexture(300,200));
   render_textures_.push_back(new RenderTexture(300,200));
 
-  for (int i = 0; i < MyShaderManager::N_LIGHTSOURCES; ++i)
+  for (int i = 0; i < SettingsManager::Instance()->N_LIGHTSOURCES; ++i)
   {
     light_sources_.push_back(LightSource());
     light_source_meshes_.push_back(new MyMesh("../data/meshes/icosphere.obj"));
@@ -42,12 +42,212 @@ Scene::~Scene()
 
 void Scene::Render(int width, int height)
 {
-  glActiveTexture(GL_TEXTURE0); // Render to this texture
-  glBindTexture(GL_TEXTURE_2D, render_textures_[0]->rendered_texture_);
-  glActiveTexture(GL_TEXTURE1); // Render to this texture
-  glBindTexture(GL_TEXTURE_2D, render_textures_[1]->rendered_texture_);
-  glActiveTexture(GL_TEXTURE2); // Render to this texture
-  glBindTexture(GL_TEXTURE_2D, render_textures_[2]->rendered_texture_);
+  glEnable(GL_CULL_FACE);
+
+  for (int i = 0; i < render_textures_.size(); ++i)
+  {
+    glActiveTexture(GL_TEXTURE0 + i); // Render to this texture
+    glBindTexture(GL_TEXTURE_2D, render_textures_[i]->rendered_texture_);
+  }
+
+
+  #ifdef NOT
+  ////////////////////
+  // 1. Render toon //
+  ////////////////////
+
+  // Render to our framebuffer in our first RenderTexture
+  glBindFramebuffer(GL_FRAMEBUFFER, render_textures_[0]->GetFrameBuffer());
+  glViewport(
+          0,
+          0,
+          render_textures_[0]->GetWidth(),
+          render_textures_[0]->GetHeight());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  for (int i = 0; i < meshes_.size(); ++i)
+  {
+    // Matrix data
+    glm::mat4 model_transform = glm::mat4(1.0);
+    glm::mat4 V = cam_->GetViewMatrix();
+    glm::mat4 MV = V * model_transform;
+    glm::mat4 P = cam_->GetProjectionMatrix();
+    glm::mat4 MVP = P * MV;
+
+    MyShaderManager::Instance()->UseProgram("Toon");
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Toon")->UniformMatrix4fv("M", 1, false, &model_transform[0][0]);
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Toon")->UniformMatrix4fv("V", 1, false, &V[0][0]);
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Toon")->UniformMatrix4fv("MV", 1, false, &MV[0][0]);
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Toon")->UniformMatrix4fv("MVP", 1, false, &MVP[0][0]);
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Toon")->Uniform1fv(
+                    "light_data",
+                    16 * light_sources_.size() * SettingsManager::Instance()->N_LIGHTSOURCES,
+                    (float*)(&light_sources_[0]));
+
+    meshes_[i]->Render();
+  }
+  glUseProgram(0);
+
+  //////////////////////////////
+  // 1.5 Render Light sources //
+  //////////////////////////////
+
+  // Render to our framebuffer in our first RenderTexture
+  glBindFramebuffer(GL_FRAMEBUFFER, render_textures_[0]->GetFrameBuffer());
+  glViewport(
+          0,
+          0,
+          render_textures_[0]->GetWidth(),
+          render_textures_[0]->GetHeight());
+  for (int i = 0; i < light_sources_.size(); ++i)
+  {
+    // Matrix data
+    glm::mat4 model_transform = glm::translate(
+            glm::mat4(1.0f),
+                    glm::vec3(
+                              light_sources_[i].position.x,
+                              light_sources_[i].position.y,
+                              light_sources_[i].position.z));
+    glm::mat4 V = cam_->GetViewMatrix();
+    glm::mat4 MV = V * model_transform;
+    glm::mat4 P = cam_->GetProjectionMatrix();
+    glm::mat4 MVP = P * MV;
+
+    MyShaderManager::Instance()->UseProgram("One_Color");
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "One_Color")->Uniform3f(
+                    "color_in",
+                    light_sources_[i].color.r,
+                    light_sources_[i].color.g,
+                    light_sources_[i].color.b);
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "One_Color")->UniformMatrix4fv("MVP", 1, false, &MVP[0][0]);
+    MyShaderManager::Instance()->UseProgram("One_Color");
+
+    light_source_meshes_[i]->Render();
+  }
+  glUseProgram(0);
+
+  /////////////////////////////
+  // 2. Render Normal colors //
+  /////////////////////////////
+
+  // Render to our framebuffer in our second RenderTexture
+  glBindFramebuffer(GL_FRAMEBUFFER, render_textures_[1]->GetFrameBuffer());
+  glViewport(
+          0,
+          0,
+          render_textures_[1]->GetWidth(),
+          render_textures_[1]->GetHeight());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  for (int i = 0; i < meshes_.size(); ++i)
+  {
+    // Matrix data
+    glm::mat4 model_transform = glm::mat4(1.0);
+    glm::mat4 V = cam_->GetViewMatrix();
+    glm::mat4 MV = V * model_transform;
+    glm::mat4 P = cam_->GetProjectionMatrix();
+    glm::mat4 MVP = P * MV;
+
+    MyShaderManager::Instance()->UseProgram("Normal_Color");
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Normal_Color")->UniformMatrix4fv("MVP", 1, false, &MVP[0][0]);
+
+    meshes_[i]->Render();
+  }
+  glUseProgram(0);
+
+  //////////////////////////////
+  // 2.5 Render Light sources //
+  //////////////////////////////
+
+  // Render to our framebuffer in our first RenderTexture
+  glBindFramebuffer(GL_FRAMEBUFFER, render_textures_[1]->GetFrameBuffer());
+  glViewport(
+          0,
+          0,
+          render_textures_[1]->GetWidth(),
+          render_textures_[1]->GetHeight());
+  for (int i = 0; i < light_sources_.size(); ++i)
+  {
+    // Matrix data
+    glm::mat4 model_transform = glm::translate(
+            glm::mat4(1.0f),
+                    glm::vec3(
+                              light_sources_[i].position.x,
+                              light_sources_[i].position.y,
+                              light_sources_[i].position.z));
+    glm::mat4 V = cam_->GetViewMatrix();
+    glm::mat4 MV = V * model_transform;
+    glm::mat4 P = cam_->GetProjectionMatrix();
+    glm::mat4 MVP = P * MV;
+
+    MyShaderManager::Instance()->UseProgram("One_Color");
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "One_Color")->Uniform3f(
+                    "color_in",
+                    light_sources_[i].color.r,
+                    light_sources_[i].color.g,
+                    light_sources_[i].color.b);
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "One_Color")->UniformMatrix4fv("MVP", 1, false, &MVP[0][0]);
+    MyShaderManager::Instance()->UseProgram("One_Color");
+
+    light_source_meshes_[i]->Render();
+  }
+  glUseProgram(0);
+
+
+  /////////////////////
+  // 3. Render Edges //
+  /////////////////////
+
+  MyShaderManager::Instance()->UseProgram("Edge_Detector");
+  MyShaderManager::Instance()->GetShaderProgramFromName(
+          "Edge_Detector")->Uniform1i("rendered_texture_sampler", 1);
+  MyShaderManager::Instance()->GetShaderProgramFromName(
+          "Edge_Detector")->Uniform2f("pixel_size",
+                  1.0/static_cast<float>
+                  (render_textures_[1]->GetWidth()),
+                  1.0/static_cast<float>
+                  (render_textures_[1]->GetHeight()));
+  // Render to our framebuffer in our second RenderTexture
+  glBindFramebuffer(GL_FRAMEBUFFER, render_textures_[2]->GetFrameBuffer());
+  glViewport(
+          0,
+          0,
+          render_textures_[2]->GetWidth(),
+          render_textures_[2]->GetHeight());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  render_textures_[2]->Render();
+  glUseProgram(0);
+
+
+  ///////////////////////////////////////
+  // 4. Render Combined Toon and Edges //
+  ///////////////////////////////////////
+
+  MyShaderManager::Instance()->UseProgram("Texture_Combiner");
+  MyShaderManager::Instance()->GetShaderProgramFromName(
+          "Texture_Combiner")->Uniform1i("texture_sampler1", 0);
+  MyShaderManager::Instance()->GetShaderProgramFromName(
+          "Texture_Combiner")->Uniform1i("texture_sampler2", 2);
+  MyShaderManager::Instance()->GetShaderProgramFromName(
+          "Texture_Combiner")->Uniform1f("multiplier1", 1.0);
+  MyShaderManager::Instance()->GetShaderProgramFromName(
+          "Texture_Combiner")->Uniform1f("multiplier2", -1.0);
+  // Render to screen
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glViewport(0, 0, width * 2, height * 2); // *2 Because of retina screen.
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  
+  render_textures_[0]->Render();
+
+  #endif
 
   /////////////////////
   // 1. Render Phong //
@@ -83,7 +283,7 @@ void Scene::Render(int width, int height)
     MyShaderManager::Instance()->GetShaderProgramFromName(
             "Phong")->Uniform1fv(
                     "light_data",
-                    16 * light_sources_.size() * MyShaderManager::N_LIGHTSOURCES,
+                    16 * light_sources_.size() * SettingsManager::Instance()->N_LIGHTSOURCES,
                     (float*)(&light_sources_[0]));
 
     meshes_[i]->Render();
@@ -116,13 +316,17 @@ void Scene::Render(int width, int height)
     glm::mat4 P = cam_->GetProjectionMatrix();
     glm::mat4 MVP = P * MV;
 
+    glm::vec3 c = light_sources_[i].color;
+
+    c *= (light_sources_[i].intensity + 50) / 100.0f;
+
     MyShaderManager::Instance()->UseProgram("One_Color");
     MyShaderManager::Instance()->GetShaderProgramFromName(
             "One_Color")->Uniform3f(
                     "color_in",
-                    light_sources_[i].color.r,
-                    light_sources_[i].color.g,
-                    light_sources_[i].color.b);
+                    c.r,
+                    c.g,
+                    c.b);
     MyShaderManager::Instance()->GetShaderProgramFromName(
             "One_Color")->UniformMatrix4fv("MVP", 1, false, &MVP[0][0]);
     MyShaderManager::Instance()->UseProgram("One_Color");
@@ -211,10 +415,7 @@ void Scene::Render(int width, int height)
 void Scene::Update()
 {
   cam_->UpdateMatrices();
-  //light_sources_[0].position.x = glm::sin(glfwGetTime()) * 7;
-  //light_sources_[0].position.z = glm::sin(glfwGetTime() + M_PI/2) * 7;
 
-  light_sources_[0].position = -SettingsManager::Instance()->light_pos;
 }
 
 Camera* Scene::GetCamera()

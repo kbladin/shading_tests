@@ -12,13 +12,11 @@ class SettingsManager
 public:
 	static SettingsManager* Instance();
 
+	const int N_LIGHTSOURCES;
 	int n_blur_loops;
 	int filter_size;
 	float multiplier1;
 	float multiplier2;
-
-	glm::vec4 light_pos;
-
 private:
 	static SettingsManager* instance_;
 	SettingsManager();
