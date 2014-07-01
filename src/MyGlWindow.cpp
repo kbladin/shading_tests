@@ -233,9 +233,11 @@ void MyGlWindow::MainLoop()
 
     RenderScene(RenderFunction, scene_);
 
+
     int width, height;
     glfwGetWindowSize(window_, &width, &height);
     TwWindowSize(width*2, height*2);
+
     TwDraw();  // draw the tweak bar(s)
     // Print FPS
     ++FPS;

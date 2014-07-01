@@ -11,7 +11,7 @@
 
 Scene::Scene(Camera* cam) : cam_(cam)
 {
-  //meshes_.push_back(new MyMesh("../data/meshes/bunny.obj"));
+  meshes_.push_back(new MyMesh("../data/meshes/bunny.obj"));
   render_textures_.push_back(new RenderTexture(4*640,4*480));
   render_textures_.push_back(new RenderTexture(4*640,4*480));
   render_textures_.push_back(new RenderTexture(4*640,4*480));
@@ -61,6 +61,7 @@ glEnable(GL_CULL_FACE);
     glActiveTexture(GL_TEXTURE0 + i); // Render to this texture
     glBindTexture(GL_TEXTURE_2D, render_textures_[i]->rendered_texture_);
   }
+
 
   ////////////////////
   // 1. Render toon //
@@ -454,11 +455,6 @@ void Scene::Render(int width, int height)
 void Scene::Update()
 { 
   cam_->UpdateMatrices();
-  Scene s(new Camera(
-          glm::vec3(0.0f,0.0f,0.0f),
-          100.0f,
-          0.1f,
-          45));
 }
 
 Camera* Scene::GetCamera()
