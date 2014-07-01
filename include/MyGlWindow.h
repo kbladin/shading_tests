@@ -17,6 +17,7 @@ private:
   int InitGLFW();
   int InitOpenGL();
   int InitTW();
+  void RenderScene(void (Scene::*function)(int, int), Scene* s);
   void UpdateMousePos();
   static void ErrorCallback(int error, const char* description);
   static void KeyCallback(
@@ -34,8 +35,10 @@ private:
   static void WindowSizeCallback(GLFWwindow* window, int width, int height);
   static void MousePosCallback(GLFWwindow* window, double xpos, double ypos);
   static void CharCallback(GLFWwindow* window, int codepoint);
-
+  static void TW_CALL LoadButtonCallback(void* client_data);
 	
+  void (Scene::* RenderFunction)(int, int);
+
   GLFWwindow* window_;
   static Scene* scene_;
   double prev_cursor_pos_x_;

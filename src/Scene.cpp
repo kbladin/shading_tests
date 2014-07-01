@@ -11,10 +11,12 @@
 
 Scene::Scene(Camera* cam) : cam_(cam)
 {
-  meshes_.push_back(new MyMesh("../data/meshes/suzanne.obj"));
+  //meshes_.push_back(new MyMesh("../data/meshes/bunny.obj"));
   render_textures_.push_back(new RenderTexture(4*640,4*480));
-  render_textures_.push_back(new RenderTexture(300,200));
-  render_textures_.push_back(new RenderTexture(300,200));
+  render_textures_.push_back(new RenderTexture(4*640,4*480));
+  render_textures_.push_back(new RenderTexture(4*640,4*480));
+  render_textures_.push_back(new RenderTexture(640/2,480/2));
+  render_textures_.push_back(new RenderTexture(640/2,480/2));
 
   for (int i = 0; i < SettingsManager::Instance()->N_LIGHTSOURCES; ++i)
   {
@@ -40,9 +42,19 @@ Scene::~Scene()
   delete cam_;
 }
 
-void Scene::Render(int width, int height)
+void Scene::AddMesh(MyMesh* mesh)
 {
-  glEnable(GL_CULL_FACE);
+  meshes_.push_back(mesh);
+}
+
+int Scene::GetNumberOfMeshes()
+{
+  return meshes_.size();
+}
+
+void Scene::RenderToon(int width, int height)
+{
+glEnable(GL_CULL_FACE);
 
   for (int i = 0; i < render_textures_.size(); ++i)
   {
@@ -50,8 +62,6 @@ void Scene::Render(int width, int height)
     glBindTexture(GL_TEXTURE_2D, render_textures_[i]->rendered_texture_);
   }
 
-
-  #ifdef NOT
   ////////////////////
   // 1. Render toon //
   ////////////////////
@@ -67,8 +77,9 @@ void Scene::Render(int width, int height)
   for (int i = 0; i < meshes_.size(); ++i)
   {
     // Matrix data
-    glm::mat4 model_transform = glm::mat4(1.0);
+    glm::mat4 model_transform = meshes_[i]->GetModelTransform();// glm::mat4(1.0);
     glm::mat4 V = cam_->GetViewMatrix();
+    glm::mat4 V_inv = glm::inverse(V);
     glm::mat4 MV = V * model_transform;
     glm::mat4 P = cam_->GetProjectionMatrix();
     glm::mat4 MVP = P * MV;
@@ -77,7 +88,7 @@ void Scene::Render(int width, int height)
     MyShaderManager::Instance()->GetShaderProgramFromName(
             "Toon")->UniformMatrix4fv("M", 1, false, &model_transform[0][0]);
     MyShaderManager::Instance()->GetShaderProgramFromName(
-            "Toon")->UniformMatrix4fv("V", 1, false, &V[0][0]);
+            "Toon")->UniformMatrix4fv("V_inv", 1, false, &V_inv[0][0]);
     MyShaderManager::Instance()->GetShaderProgramFromName(
             "Toon")->UniformMatrix4fv("MV", 1, false, &MV[0][0]);
     MyShaderManager::Instance()->GetShaderProgramFromName(
@@ -87,6 +98,14 @@ void Scene::Render(int width, int height)
                     "light_data",
                     16 * light_sources_.size() * SettingsManager::Instance()->N_LIGHTSOURCES,
                     (float*)(&light_sources_[0]));
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Toon")->Uniform1f("ambient_brightness",amb_light_.intensity);
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Toon")->Uniform3f(
+                    "ambient_color",
+                    amb_light_.color.r,
+                    amb_light_.color.g,
+                    amb_light_.color.b);
 
     meshes_[i]->Render();
   }
@@ -112,10 +131,11 @@ void Scene::Render(int width, int height)
                               light_sources_[i].position.x,
                               light_sources_[i].position.y,
                               light_sources_[i].position.z));
-    glm::mat4 V = cam_->GetViewMatrix();
-    glm::mat4 MV = V * model_transform;
-    glm::mat4 P = cam_->GetProjectionMatrix();
-    glm::mat4 MVP = P * MV;
+
+    glm::mat4 MVP =
+            cam_->GetProjectionMatrix() *
+            cam_->GetViewMatrix() *
+            model_transform;
 
     MyShaderManager::Instance()->UseProgram("One_Color");
     MyShaderManager::Instance()->GetShaderProgramFromName(
@@ -147,11 +167,11 @@ void Scene::Render(int width, int height)
   for (int i = 0; i < meshes_.size(); ++i)
   {
     // Matrix data
-    glm::mat4 model_transform = glm::mat4(1.0);
-    glm::mat4 V = cam_->GetViewMatrix();
-    glm::mat4 MV = V * model_transform;
-    glm::mat4 P = cam_->GetProjectionMatrix();
-    glm::mat4 MVP = P * MV;
+    glm::mat4 model_transform = meshes_[i]->GetModelTransform();// glm::mat4(1.0);
+    glm::mat4 MVP =
+            cam_->GetProjectionMatrix() *
+            cam_->GetViewMatrix() *
+            model_transform;
 
     MyShaderManager::Instance()->UseProgram("Normal_Color");
     MyShaderManager::Instance()->GetShaderProgramFromName(
@@ -181,10 +201,10 @@ void Scene::Render(int width, int height)
                               light_sources_[i].position.x,
                               light_sources_[i].position.y,
                               light_sources_[i].position.z));
-    glm::mat4 V = cam_->GetViewMatrix();
-    glm::mat4 MV = V * model_transform;
-    glm::mat4 P = cam_->GetProjectionMatrix();
-    glm::mat4 MVP = P * MV;
+    glm::mat4 MVP =
+            cam_->GetProjectionMatrix() *
+            cam_->GetViewMatrix() *
+            model_transform;
 
     MyShaderManager::Instance()->UseProgram("One_Color");
     MyShaderManager::Instance()->GetShaderProgramFromName(
@@ -246,8 +266,18 @@ void Scene::Render(int width, int height)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   quad_.Render();
+}
 
-  #endif
+
+void Scene::Render(int width, int height)
+{
+  glEnable(GL_CULL_FACE);
+
+  for (int i = 0; i < render_textures_.size(); ++i)
+  {
+    glActiveTexture(GL_TEXTURE0 + i); // Render to this texture
+    glBindTexture(GL_TEXTURE_2D, render_textures_[i]->rendered_texture_);
+  }
 
   /////////////////////
   // 1. Render Phong //
@@ -264,8 +294,9 @@ void Scene::Render(int width, int height)
   for (int i = 0; i < meshes_.size(); ++i)
   {
     // Matrix data
-    glm::mat4 model_transform = glm::mat4(1.0);
+    glm::mat4 model_transform = meshes_[i]->GetModelTransform();// glm::mat4(1.0);
     glm::mat4 V = cam_->GetViewMatrix();
+    glm::mat4 V_inv = glm::inverse(V);
     glm::mat4 MV = V * model_transform;
     glm::mat4 P = cam_->GetProjectionMatrix();
     glm::mat4 MVP = P * MV;
@@ -274,7 +305,7 @@ void Scene::Render(int width, int height)
     MyShaderManager::Instance()->GetShaderProgramFromName(
             "Phong")->UniformMatrix4fv("M", 1, false, &model_transform[0][0]);
     MyShaderManager::Instance()->GetShaderProgramFromName(
-            "Phong")->UniformMatrix4fv("V", 1, false, &V[0][0]);
+            "Phong")->UniformMatrix4fv("V_inv", 1, false, &V_inv[0][0]);
     MyShaderManager::Instance()->GetShaderProgramFromName(
             "Phong")->UniformMatrix4fv("MV", 1, false, &MV[0][0]);
     MyShaderManager::Instance()->GetShaderProgramFromName(
@@ -285,6 +316,14 @@ void Scene::Render(int width, int height)
                     "light_data",
                     16 * light_sources_.size() * SettingsManager::Instance()->N_LIGHTSOURCES,
                     (float*)(&light_sources_[0]));
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Phong")->Uniform1f("ambient_brightness",amb_light_.intensity);
+    MyShaderManager::Instance()->GetShaderProgramFromName(
+            "Phong")->Uniform3f(
+                    "ambient_color",
+                    amb_light_.color.r,
+                    amb_light_.color.g,
+                    amb_light_.color.b);
 
     meshes_[i]->Render();
   }
@@ -311,10 +350,10 @@ void Scene::Render(int width, int height)
                               light_sources_[i].position.x,
                               light_sources_[i].position.y,
                               light_sources_[i].position.z));
-    glm::mat4 V = cam_->GetViewMatrix();
-    glm::mat4 MV = V * model_transform;
-    glm::mat4 P = cam_->GetProjectionMatrix();
-    glm::mat4 MVP = P * MV;
+    glm::mat4 MVP =
+            cam_->GetProjectionMatrix() *
+            cam_->GetViewMatrix() *
+            model_transform;
 
     glm::vec3 c = light_sources_[i].color;
 
@@ -343,12 +382,12 @@ void Scene::Render(int width, int height)
   MyShaderManager::Instance()->GetShaderProgramFromName(
           "Bright_Light")->Uniform1i("rendered_texture_sampler", 0);
   // Render to our framebuffer in our second RenderTexture
-  glBindFramebuffer(GL_FRAMEBUFFER, render_textures_[1]->GetFrameBuffer());
+  glBindFramebuffer(GL_FRAMEBUFFER, render_textures_[3]->GetFrameBuffer());
   glViewport(
           0,
           0,
-          render_textures_[1]->GetWidth(),
-          render_textures_[1]->GetHeight());
+          render_textures_[3]->GetWidth(),
+          render_textures_[3]->GetHeight());
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   quad_.Render();
   glUseProgram(0);
@@ -359,8 +398,8 @@ void Scene::Render(int width, int height)
   ////////////////////////////////////
 
   // Ping pong
-  int texture_to_sample = 1;
-  int texture_to_render = 2;
+  int texture_to_sample = 3;
+  int texture_to_render = 4;
   for (int ping_pong = 0; ping_pong < SettingsManager::Instance()->n_blur_loops; ++ping_pong)
   {
     MyShaderManager::Instance()->UseProgram("Blur");
@@ -413,9 +452,13 @@ void Scene::Render(int width, int height)
 }
 
 void Scene::Update()
-{
+{ 
   cam_->UpdateMatrices();
-
+  Scene s(new Camera(
+          glm::vec3(0.0f,0.0f,0.0f),
+          100.0f,
+          0.1f,
+          45));
 }
 
 Camera* Scene::GetCamera()

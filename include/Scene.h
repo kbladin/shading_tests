@@ -9,6 +9,15 @@
 #include "../include/RenderTexture.h"
 #include "../include/Quad.h"
 
+struct AmbientLight {
+  float intensity;
+  glm::vec3 color;
+
+  AmbientLight(){
+    intensity = 0.2f;
+    color = glm::vec3(1.0f,1.0f,1.0f);
+  }
+};
 
 struct LightSource {
 	// 0
@@ -41,11 +50,14 @@ class Scene
 public:
   Scene(Camera* cam);
   ~Scene();
+  void AddMesh(MyMesh* mesh);
+  int GetNumberOfMeshes();
+  void RenderToon(int width, int height);
   void Render(int width, int height);
   void Update();
   Camera* GetCamera();
   std::vector<LightSource> light_sources_;
-
+  AmbientLight amb_light_;
 private:
   Camera* cam_;
   std::vector<MyMesh*> meshes_;

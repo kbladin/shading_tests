@@ -40,7 +40,8 @@ uniform sampler2D texture_sampler2D;
 //uniform Material material;
 
 uniform float light_data[16 * N_LIGHTSOURCES]; // 16 floats for each light
-
+uniform float ambient_brightness;
+uniform vec3 ambient_color;
 // Ouput data
 out vec3 color;
 
@@ -56,9 +57,6 @@ float stair(float val, int n_vals) {
 
 void main()
 {
-  float ambient_brightness = 0.1;
-  vec3 ambient_color = vec3(1,1,1);
-
   // Diffuse color
   vec3 material_diffuse_color = vec3(1.0,0.8,0.8);
 
@@ -111,7 +109,7 @@ void main()
     }
     // ----- Diffuse light -----
     vec3 diffuse = attenuation * lights[i].color * material_diffuse_color *
-            stair(dot(n,l),2);
+            stair(dot(n,l),1);
 
     // ----- Specular light -----
     vec3 specular;

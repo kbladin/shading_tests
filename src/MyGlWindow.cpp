@@ -12,7 +12,6 @@
 Scene* MyGlWindow::scene_;
 bool MyGlWindow::mouse_pressed_;
 
-
 MyGlWindow::MyGlWindow()
 {
   if (InitGLFW() != 0)
@@ -27,6 +26,8 @@ MyGlWindow::MyGlWindow()
           0.1f,
           aspect_ratio));
   InitTW();
+
+  RenderFunction = &Scene::Render;
 }
 
 MyGlWindow::~MyGlWindow()
@@ -87,13 +88,13 @@ int MyGlWindow::InitTW()
   TwInit(TW_OPENGL_CORE, NULL);
   TwWindowSize(width*2, height*2);
   TwBar *global_bar;
-  global_bar = TwNewBar("Global Variables");
+  global_bar = TwNewBar("Shader properties");
   TwAddVarRW(
           global_bar,
           "Number of blur loops",
           TW_TYPE_UINT8,
           &SettingsManager::Instance()->n_blur_loops,
-          "");
+          "min=0 max=16 step=1");
   TwAddVarRW(
           global_bar,
           "Blur filter size",
@@ -112,6 +113,23 @@ int MyGlWindow::InitTW()
           TW_TYPE_FLOAT,
           &SettingsManager::Instance()->multiplier2,
           "min=-1.0 max=2.0 step=0.1");
+  TwAddVarRW(
+          global_bar,
+          "Ambient light intensity", 
+          TW_TYPE_FLOAT,
+          &scene_->amb_light_.intensity,
+          "min=0.0 max=1.0 step=0.01");
+  TwAddVarRW(
+          global_bar,
+          "Ambient light color", 
+          TW_TYPE_COLOR3F,
+          &scene_->amb_light_.color,
+          "");
+
+/*  TwEnumVal renderEV[] = { { MyGlWindow::PHONG, "Phong"}, 
+                             { MyGlWindow::TOON,  "Toon" } };
+*/
+
 
   for (int i = 0; i < SettingsManager::Instance()->N_LIGHTSOURCES; ++i)
   {
@@ -130,13 +148,13 @@ int MyGlWindow::InitTW()
             light_bar,
             "Color", 
             TW_TYPE_COLOR3F,
-            &scene_->light_sources_[i].color.x,
+            &scene_->light_sources_[i].color,
             "");
     TwAddVarRW(
             light_bar,
             "Position", 
             TW_TYPE_DIR3F,
-            &scene_->light_sources_[i].position.x,
+            &scene_->light_sources_[i].position,
             "");
 /*    TwAddVarRW(
             light_bar,
@@ -180,13 +198,26 @@ int MyGlWindow::InitTW()
             TW_TYPE_DIR3F,
             &scene_->light_sources_[i].spot_direction.x,
             "");
-
   }
+
+  TwBar *load_file_bar;
+  load_file_bar = TwNewBar("Load files");  
+  TwAddVarRW(load_file_bar, "File path", TW_TYPE_CSSTRING(SettingsManager::Instance()->FILENAME_SIZE), SettingsManager::Instance()->file_to_load, "");
+  TwAddButton(load_file_bar, "Load", LoadButtonCallback, scene_, "");
+
+
 
   TwDefine(" GLOBAL fontsize=3 ");
   TwDefine(" GLOBAL fontresizable=false "); // font cannot be resized
 
   return 0;
+}
+
+void MyGlWindow::RenderScene(void (Scene::*RenderFunction)(int, int), Scene* s)
+{
+  int width, height;
+  glfwGetWindowSize(window_, &width, &height);
+  (s->*RenderFunction)(width, height);
 }
 
 void MyGlWindow::MainLoop()
@@ -198,11 +229,13 @@ void MyGlWindow::MainLoop()
     UpdateMousePos();
     scene_->Update();
 
+
+
+    RenderScene(RenderFunction, scene_);
+
     int width, height;
     glfwGetWindowSize(window_, &width, &height);
-    scene_->Render(width, height);
     TwWindowSize(width*2, height*2);
-
     TwDraw();  // draw the tweak bar(s)
     // Print FPS
     ++FPS;
@@ -220,8 +253,6 @@ void MyGlWindow::MainLoop()
 
     glfwSwapBuffers(window_);
     glfwPollEvents();
-
-
   }
 }
 
@@ -259,6 +290,30 @@ void MyGlWindow::KeyCallback(
       glfwSetWindowShouldClose(window, true);
     }
   }
+ 
+  // Convert from glfw3 to glfw2 which Anttweakbar understands
+  switch(key) {
+    case GLFW_KEY_UP: key = 256 + 27; break;
+    case GLFW_KEY_DOWN: key = 256 + 28; break;
+    case GLFW_KEY_LEFT: key = 256 + 29; break;
+    case GLFW_KEY_RIGHT: key = 256 + 30; break;
+    case GLFW_KEY_LEFT_SHIFT : key = 256 + 31; break;
+    case GLFW_KEY_RIGHT_SHIFT : key = 256 + 32; break;
+    case GLFW_KEY_LEFT_CONTROL : key = 256 + 33; break;
+    case GLFW_KEY_RIGHT_CONTROL : key = 256 + 34; break;
+    case GLFW_KEY_LEFT_ALT : key = 256 + 35; break;
+    case GLFW_KEY_RIGHT_ALT : key = 256 + 36; break;
+    case GLFW_KEY_TAB : key = 256 + 37; break;
+    case GLFW_KEY_ENTER : key = 256 + 38; break;
+    case GLFW_KEY_BACKSPACE : key = 256 + 39; break;
+    case GLFW_KEY_INSERT : key = 256 + 40; break;
+    case GLFW_KEY_DELETE : key = 256 + 41; break;
+    case GLFW_KEY_PAGE_UP : key = 256 + 42; break;
+    case GLFW_KEY_PAGE_DOWN : key = 256 + 43; break;
+    case GLFW_KEY_HOME : key = 256 + 44; break;
+    case GLFW_KEY_END : key = 256 + 45; break;
+    default: break;
+  }
   TwEventKeyGLFW(key, action);
 }
 
@@ -294,5 +349,33 @@ void MyGlWindow::MousePosCallback(GLFWwindow* window, double xpos, double ypos)
 void MyGlWindow::CharCallback(GLFWwindow* window, int codepoint)
 {
   TwEventCharGLFW(codepoint, GLFW_PRESS);
+}
+
+void TW_CALL MyGlWindow::LoadButtonCallback(void* client_data)
+{
+  MyMesh* new_mesh = new MyMesh(SettingsManager::Instance()->file_to_load);
+  if (!new_mesh->IsCorrupt())
+  {
+    TwBar *mesh_bar;
+    std::stringstream bar_name;
+    bar_name << "Mesh " << scene_->GetNumberOfMeshes();
+    mesh_bar = TwNewBar(bar_name.str().c_str());
+    TwAddVarRW(
+            mesh_bar,
+            "Position", 
+            TW_TYPE_DIR3F,
+            &new_mesh->position_,
+            "");
+    TwAddVarRW(
+            mesh_bar,
+            "Rotation", 
+            TW_TYPE_QUAT4F,
+            &new_mesh->quaternion_,
+            "");
+
+    scene_->AddMesh(new_mesh);
+  }
+  else
+    delete new_mesh;
 }
 

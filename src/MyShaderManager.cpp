@@ -134,7 +134,7 @@ void MyShaderManager::AddAllShaderPrograms()
 void MyShaderManager::AddSimpleShaderProgram(){
     // Create ShaderProgram
   ShaderProgram* shader_program =
-  new ShaderProgram(shaders_["Simple_Vert"],
+  new ShaderProgram(shaders_["MVP_Vert"],
                     shaders_["Simple_Frag"]);
   // The name with which to refer to the ShaderProgram
   const char* shader_program_name = "Simple";
@@ -160,9 +160,13 @@ void MyShaderManager::AddPhongShaderProgram()
   shader_programs_[shader_program_name]->CreateUniformLocation("MVP");
   shader_programs_[shader_program_name]->CreateUniformLocation("MV");
   shader_programs_[shader_program_name]->CreateUniformLocation("M");
-  shader_programs_[shader_program_name]->CreateUniformLocation("V");
+  shader_programs_[shader_program_name]->CreateUniformLocation("V_inv");
   shader_programs_[shader_program_name]->CreateUniformLocation(
-          "light_data"); // Containt all lights*/
+          "light_data"); // Containt all lights
+  shader_programs_[shader_program_name]->CreateUniformLocation(
+          "ambient_brightness");
+  shader_programs_[shader_program_name]->CreateUniformLocation(
+          "ambient_color");
   /*
   shader_programs_[shader_program_name]->CreateUniformLocation(
           "texture_sampler2D");
@@ -193,9 +197,13 @@ void MyShaderManager::AddToonShaderProgram()
   shader_programs_[shader_program_name]->CreateUniformLocation("MVP");
   shader_programs_[shader_program_name]->CreateUniformLocation("MV");
   shader_programs_[shader_program_name]->CreateUniformLocation("M");
-  shader_programs_[shader_program_name]->CreateUniformLocation("V");
+  shader_programs_[shader_program_name]->CreateUniformLocation("V_inv");
   shader_programs_[shader_program_name]->CreateUniformLocation(
           "light_data"); // Containt all lights*/
+  shader_programs_[shader_program_name]->CreateUniformLocation(
+          "ambient_brightness");
+  shader_programs_[shader_program_name]->CreateUniformLocation(
+          "ambient_color");
   /*
   shader_programs_[shader_program_name]->CreateUniformLocation(
           "texture_sampler2D");
