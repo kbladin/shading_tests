@@ -35,8 +35,11 @@ private:
   static void WindowSizeCallback(GLFWwindow* window, int width, int height);
   static void MousePosCallback(GLFWwindow* window, double xpos, double ypos);
   static void CharCallback(GLFWwindow* window, int codepoint);
+
   static void TW_CALL LoadButtonCallback(void* client_data);
-	
+  static void TW_CALL PreLoadButtonCallback(void* client_data);
+  static void TW_CALL CancelButtonCallback(void* client_data);
+
   void (Scene::* RenderFunction)(int, int);
 
   GLFWwindow* window_;
@@ -44,6 +47,9 @@ private:
   double prev_cursor_pos_x_;
   double prev_cursor_pos_y_;
   static bool mouse_pressed_;
+
+  // Ant tweak bar
+  static TwBar* load_file_bar_;
 };
 
 #endif // MY_GL_WINDOW_H

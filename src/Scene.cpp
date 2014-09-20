@@ -11,7 +11,7 @@
 
 Scene::Scene(Camera* cam) : cam_(cam)
 {
-  meshes_.push_back(new MyMesh("../data/meshes/bunny.obj"));
+  //meshes_.push_back(new MyMesh("../data/meshes/bunny.obj"));
   render_textures_.push_back(new RenderTexture(4*640,4*480));
   render_textures_.push_back(new RenderTexture(4*640,4*480));
   render_textures_.push_back(new RenderTexture(4*640,4*480));

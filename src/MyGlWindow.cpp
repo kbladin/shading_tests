@@ -11,6 +11,7 @@
 
 Scene* MyGlWindow::scene_;
 bool MyGlWindow::mouse_pressed_;
+TwBar* MyGlWindow::load_file_bar_;
 
 MyGlWindow::MyGlWindow()
 {
@@ -87,44 +88,52 @@ int MyGlWindow::InitTW()
     // Initialize anttweakbar
   TwInit(TW_OPENGL_CORE, NULL);
   TwWindowSize(width*2, height*2);
-  TwBar *global_bar;
-  global_bar = TwNewBar("Shader properties");
+
+  TwBar *menu_bar;
+  menu_bar = TwNewBar("Menu");
+  //TwAddSeparator(menu_bar, NULL, " group='File'");
+  //TwAddSeparator(menu_bar, NULL, " group='Shader properties'");
+
+
+  TwAddButton(menu_bar, "Load obj mesh", PreLoadButtonCallback, scene_, " group=File ");
+  //TwAddButton(load_file_bar, "Load", LoadButtonCallback, scene_, "");
+
   TwAddVarRW(
-          global_bar,
+          menu_bar,
           "Number of blur loops",
           TW_TYPE_UINT8,
           &SettingsManager::Instance()->n_blur_loops,
-          "min=0 max=16 step=1");
+          "min=0 max=16 step=1 group='Shader properties' ");
   TwAddVarRW(
-          global_bar,
+          menu_bar,
           "Blur filter size",
           TW_TYPE_UINT8,
           &SettingsManager::Instance()->filter_size,
-          "");
+          " group='Shader properties' ");
   TwAddVarRW(
-          global_bar,
+          menu_bar,
           "Multiplier 1",
           TW_TYPE_FLOAT,
           &SettingsManager::Instance()->multiplier1,
-          "min=-1.0 max=2.0 step=0.1");
+          "min=-1.0 max=2.0 step=0.1 group='Shader properties' ");
   TwAddVarRW(
-          global_bar,
+          menu_bar,
           "Multiplier 2",
           TW_TYPE_FLOAT,
           &SettingsManager::Instance()->multiplier2,
-          "min=-1.0 max=2.0 step=0.1");
+          "min=-1.0 max=2.0 step=0.1 group='Shader properties' ");
   TwAddVarRW(
-          global_bar,
+          menu_bar,
           "Ambient light intensity", 
           TW_TYPE_FLOAT,
           &scene_->amb_light_.intensity,
-          "min=0.0 max=1.0 step=0.01");
+          "min=0.0 max=1.0 step=0.01 group='Shader properties' ");
   TwAddVarRW(
-          global_bar,
+          menu_bar,
           "Ambient light color", 
           TW_TYPE_COLOR3F,
           &scene_->amb_light_.color,
-          "");
+          " group='Shader properties' ");
 
 /*  TwEnumVal renderEV[] = { { MyGlWindow::PHONG, "Phong"}, 
                              { MyGlWindow::TOON,  "Toon" } };
@@ -133,79 +142,84 @@ int MyGlWindow::InitTW()
 
   for (int i = 0; i < SettingsManager::Instance()->N_LIGHTSOURCES; ++i)
   {
-    TwBar *light_bar;
-    std::stringstream bar_name;
-    bar_name << "Light " << i << " properties";
-    light_bar = TwNewBar(bar_name.str().c_str());
+    std::stringstream group_name;
+    group_name << "group = 'Light " << i << " properties' ";
 
     TwAddVarRW(
-            light_bar,
+            menu_bar,
             "Intensity", 
             TW_TYPE_FLOAT,
             &scene_->light_sources_[i].intensity,
-            "min=0.0 max=100.0 step=1.0");
+            group_name.str().c_str());
     TwAddVarRW(
-            light_bar,
+            menu_bar,
             "Color", 
             TW_TYPE_COLOR3F,
             &scene_->light_sources_[i].color,
-            "");
+            group_name.str().c_str());
     TwAddVarRW(
-            light_bar,
+            menu_bar,
             "Position", 
             TW_TYPE_DIR3F,
             &scene_->light_sources_[i].position,
-            "");
+            group_name.str().c_str());
 /*    TwAddVarRW(
-            light_bar,
+            menu_bar,
             "Directional", 
             TW_TYPE_BOOL32,
             &scene_->light_sources_[i].position.w,
-            "");*/
+            group_name.str().c_str());*/
+
     TwAddVarRW(
-            light_bar,
+            menu_bar,
             "Constant attenuation",
             TW_TYPE_FLOAT,
             &scene_->light_sources_[i].constant_attenuation,
-            "min=0.0 max=1.0 step=0.1");
+            group_name.str().c_str());
     TwAddVarRW(
-            light_bar,
+            menu_bar,
             "Linear attenuation",
             TW_TYPE_FLOAT,
             &scene_->light_sources_[i].linear_attenuation,
-            "min=0.0 max=1.0 step=0.1");
+            group_name.str().c_str());
     TwAddVarRW(
-            light_bar,
+            menu_bar,
             "Quadratic attenuation",
             TW_TYPE_FLOAT,
             &scene_->light_sources_[i].quadratic_attenuation,
-            "min=0.0 max=1.0 step=0.1");
+            group_name.str().c_str());
     TwAddVarRW(
-            light_bar,
+            menu_bar,
             "Spot cutoff",
             TW_TYPE_FLOAT,
             &scene_->light_sources_[i].spot_cutoff,
-            "min=0.0 max=100.0 step=1.0");
+            group_name.str().c_str());
     TwAddVarRW(
-            light_bar,
+            menu_bar,
             "Spot exponent",
             TW_TYPE_FLOAT,
             &scene_->light_sources_[i].spot_exponent,
-            "min=0.0 max=100.0 step=1.0");
+            group_name.str().c_str());
     TwAddVarRW(
-            light_bar,
+            menu_bar,
             "Spot direction",
             TW_TYPE_DIR3F,
             &scene_->light_sources_[i].spot_direction.x,
-            "");
+            group_name.str().c_str());
+
+    TwDefine(" Menu/Intensity min=0.0 max=100.0 step=1.0 ");
+    TwDefine(" Menu/'Constant attenuation' min=0.0 max=1.0 step=0.1 ");
+    TwDefine(" Menu/'Linear attenuation' min=0.0 max=1.0 step=0.1 ");
+    TwDefine(" Menu/'Quadratic attenuation' min=0.0 max=1.0 step=0.1 ");
+    TwDefine(" Menu/'Spot cutoff' min=0.0 max=100.0 step=1.0 ");
+    TwDefine(" Menu/'Spot exponent' min=0.0 max=100.0 step=1.0 ");
+
   }
-
-  TwBar *load_file_bar;
-  load_file_bar = TwNewBar("Load files");  
-  TwAddVarRW(load_file_bar, "File path", TW_TYPE_CSSTRING(SettingsManager::Instance()->FILENAME_SIZE), SettingsManager::Instance()->file_to_load, "");
-  TwAddButton(load_file_bar, "Load", LoadButtonCallback, scene_, "");
-
-
+  TwDefine(" Menu size='300 800' "); // resize bar
+  TwDefine(" Menu movable=false "); // resize bar
+  TwDefine(" Menu resizable=false "); // resize bar
+  TwDefine(" Menu color='64 64 64' alpha=255 text=light "); // light-green bar with dark text color
+  TwDefine(" Menu alwaysbottom=true "); // resize bar
 
   TwDefine(" GLOBAL fontsize=3 ");
   TwDefine(" GLOBAL fontresizable=false "); // font cannot be resized
@@ -353,6 +367,21 @@ void MyGlWindow::CharCallback(GLFWwindow* window, int codepoint)
   TwEventCharGLFW(codepoint, GLFW_PRESS);
 }
 
+void TW_CALL MyGlWindow::PreLoadButtonCallback(void* client_data)
+{
+  load_file_bar_ = TwNewBar("Load obj file");  
+  TwAddVarRW(load_file_bar_, "File path", TW_TYPE_CSSTRING(SettingsManager::Instance()->FILENAME_SIZE), SettingsManager::Instance()->file_to_load, "");
+  TwAddButton(load_file_bar_, "Load", LoadButtonCallback, scene_, "");
+  TwAddButton(load_file_bar_, "Cancel", CancelButtonCallback, load_file_bar_, "");
+
+  TwDefine(" 'Load obj file' size='300 800' "); // resize bar
+  TwDefine(" 'Load obj file' position='16 16' "); // resize bar
+  TwDefine(" 'Load obj file' movable=false "); // resize bar
+  TwDefine(" 'Load obj file' resizable=false "); // resize bar
+  TwDefine(" 'Load obj file' alwaystop=true "); // resize bar
+  TwDefine(" 'Load obj file' color='100 100 100' alpha=255 text=light "); // light-green bar with dark text color
+}
+
 void TW_CALL MyGlWindow::LoadButtonCallback(void* client_data)
 {
   MyMesh* new_mesh = new MyMesh(SettingsManager::Instance()->file_to_load);
@@ -376,8 +405,18 @@ void TW_CALL MyGlWindow::LoadButtonCallback(void* client_data)
             "");
 
     scene_->AddMesh(new_mesh);
+
+    TwDeleteBar(load_file_bar_);
   }
   else
     delete new_mesh;
 }
+
+void TW_CALL MyGlWindow::CancelButtonCallback(void* client_data)
+{
+  TwDeleteBar(static_cast<TwBar*>(client_data));
+}
+
+
+
 
